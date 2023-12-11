@@ -1,4 +1,6 @@
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 /**
  *
@@ -10,6 +12,9 @@ public class User implements Observable, Composite, ComponentElement {
     private ArrayList<String> posts = new ArrayList<String>();
     private String post;
     private String name;
+    private long updateTime;
+    private long timeOfCreation;
+    private SimpleDateFormat formattedTime = new SimpleDateFormat("MMM dd, yyyy HH:mm");    
 
     
     public User(String name){
@@ -53,6 +58,20 @@ public class User implements Observable, Composite, ComponentElement {
         }
     }
     
+    public void setUpdateTime(long updateTime){
+        this.updateTime = updateTime;
+    }
+    
+    public String updateTime(){
+        Date formattedDate = new Date(this.updateTime);
+        String newString = this.formattedTime.format(formattedDate);
+        return newString;
+    }
+    
+    public long getUpdateTime(){
+        return this.updateTime;
+    }
+    
     @Override
     public void addObserver(Observer observer) {
         if(!this.followers.contains(observer)){
@@ -73,6 +92,18 @@ public class User implements Observable, Composite, ComponentElement {
     @Override
     public void accept(ComponentVisitor visitor) {
         visitor.visitUsers(this);
+    }
+
+    @Override
+    public String creationTime() {
+        Date formattedDate = new Date(this.timeOfCreation);
+        String newString = this.formattedTime.format(formattedDate);
+        return newString;
+    }
+
+    @Override
+    public void setCreationTime(long creationTime) {
+        this.timeOfCreation = creationTime;
     }
     
 }
