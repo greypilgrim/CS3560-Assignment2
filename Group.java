@@ -1,4 +1,5 @@
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 /**
  *
@@ -8,6 +9,8 @@ public class Group implements Composite, ComponentElement{
     private List<Composite> listOfUserGroups = new ArrayList<>();
     
     private String groupName;
+    private long timeOfCreation;
+    private SimpleDateFormat formattedTime = new SimpleDateFormat("MMM dd, yyyy HH:mm");
     
     public Group(String newID){
         setID(newID);
@@ -58,4 +61,17 @@ public class Group implements Composite, ComponentElement{
     public void accept(ComponentVisitor visitor) {
         visitor.visitGroups(this);
     }
+
+    @Override
+    public String creationTime() {
+        Date formattedDate = new Date(this.timeOfCreation);
+        String newString = this.formattedTime.format(formattedDate);
+        return newString;
+    }
+
+    @Override
+    public void setCreationTime(long creationTime) {
+        this.timeOfCreation = creationTime;
+    }
 }
+
