@@ -9,7 +9,6 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
@@ -98,7 +97,7 @@ public class UserPanel implements ActionListener, TreeModelListener, TreeSelecti
         
         //user ID panel
         userIdPanel = new JPanel();
-        userIdLabel1 = new JLabel("User ID");
+        userIdLabel1 = new JLabel("User ID, Created at: " + this.userCopy.creationTime());
         userIdLabel2 = new JLabel("To follow a user, enter their name above");
         userIdTextArea = new JTextArea(userID, 1, 20);
         userIdPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -125,7 +124,6 @@ public class UserPanel implements ActionListener, TreeModelListener, TreeSelecti
         currentlyFollowingTree.setShowsRootHandles(true);
         
         currentlyFollowingTree = new JTree(following);
-        //populateTree(following, getUser(this.userID).getFollowing());
         currentlyFollowingTree.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         currentlyFollowingTree.setBounds(0, 100, treeWidth, treeHeight);
         currentlyFollowingTree.setBackground(new Color(80,128,128));  
@@ -208,7 +206,7 @@ public class UserPanel implements ActionListener, TreeModelListener, TreeSelecti
     public void populateFollowerTree(DefaultMutableTreeNode seletedTreeNode){
         for(int i = 0; i < userCopy.getFollowers().size(); i++){
             seletedTreeNode.add(new DefaultMutableTreeNode(userCopy.getFollowers().get(i).toString()));
-            System.out.println(userCopy.getFollowers().get(i).toString());
+            //System.out.println(userCopy.getFollowers().get(i).toString());
         }
         ((DefaultTreeModel) currentlyFollowingTree.getModel()).reload(following);
     }
@@ -219,12 +217,12 @@ public class UserPanel implements ActionListener, TreeModelListener, TreeSelecti
     public User getUser(String name){
         User newUser = new User(name);
         if(AdminPanel.mapOfUsers.containsValue(newUser)){
-            System.out.println("Got user object");
+            //System.out.println("Got user object");
             int userInd = AdminPanel.listOfUsersAndGroups.indexOf(newUser);
             return newUser;
         }
         else{
-            System.out.println("Didn't get it");
+            //System.out.println("Didn't get it");
             return null;
         }
     }
@@ -251,12 +249,12 @@ public class UserPanel implements ActionListener, TreeModelListener, TreeSelecti
         
         if(e.getSource() == postTweetButton){
             this.userCopy.makePost(this.tweetMessageTextArea.getText());
+            this.userCopy.setUpdateTime(System.currentTimeMillis());
             AdminPanel.visitor.visitMessages(userCopy);
-            listModel.addElement(this.userCopy.getID() + ": " + this.tweetMessageTextArea.getText());
-            this.messageFeed.add((this.tweetMessageTextArea.getText()));
-            for(int i = 0; i < this.messageFeed.size(); i++){
-                System.out.println(this.messageFeed.get(i));
-            }
+            listModel.addElement(this.userID + ", " + this.userCopy.updateTime() 
+                    + ": " + this.tweetMessageTextArea.getText());
+            this.messageFeed.add((this.userID + ", " + this.userCopy.updateTime()) 
+                    + ": " + this.tweetMessageTextArea.getText());
         }
     }
 
