@@ -9,6 +9,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -86,8 +87,18 @@ public class AdminPanel implements ActionListener, TreeModelListener, TreeSelect
     //show positive percentage button
     JButton sPositivePercentageButton;
     
+    //Id verification button
+    JButton verificationButton;
+    
+    //last update button
+    JButton lastUpdateButton;
+    
+    //Mid panel
+    JPanel midPanel;
+    
     DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
     DefaultTreeModel treeModel = new DefaultTreeModel(root);
+    private SimpleDateFormat formattedTime = new SimpleDateFormat("MMM dd, yyyy HH:mm");
     
     protected AdminPanel(){
         
@@ -152,6 +163,21 @@ public class AdminPanel implements ActionListener, TreeModelListener, TreeSelect
         oUserViewButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         oUserViewButton.setFont(new Font("Comic Sans", Font.BOLD, 20));
         
+        //ID verification button
+        verificationButton = new JButton("ID Verification");
+        verificationButton.addActionListener(this);
+        verificationButton.setBounds(300,120,buttonWidth,buttonHeight);
+        verificationButton.setBackground(new Color(0,128,128));
+        verificationButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        verificationButton.setFont(new Font("Comic Sans", Font.BOLD, 20));
+        
+        lastUpdateButton = new JButton("Last Update");
+        lastUpdateButton.addActionListener(this);
+        lastUpdateButton.setBounds(300,120,buttonWidth,buttonHeight);
+        lastUpdateButton.setBackground(new Color(0,128,128));
+        lastUpdateButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        lastUpdateButton.setFont(new Font("Comic Sans", Font.BOLD, 20));
+        
         //show user total button
         sUserTotalButton = new JButton("Show User Total");
         sUserTotalButton.addActionListener(this);
@@ -182,7 +208,7 @@ public class AdminPanel implements ActionListener, TreeModelListener, TreeSelect
         sPositivePercentageButton.setBounds(600,330,buttonWidth,buttonHeight);
         sPositivePercentageButton.setBackground(new Color(0,128,128));
         sPositivePercentageButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        sPositivePercentageButton.setFont(new Font("Comic Sans", Font.BOLD, 20));;        
+        sPositivePercentageButton.setFont(new Font("Comic Sans", Font.BOLD, 20));        
         
         
         //set top right corner panel
@@ -193,6 +219,14 @@ public class AdminPanel implements ActionListener, TreeModelListener, TreeSelect
         topRightGroupPanel.add(addUserButton);
         topRightGroupPanel.add(groupIdPanel);
         topRightGroupPanel.add(addGroupButton);
+        
+        //set mid panel
+        midPanel = new JPanel();
+        midPanel.setLayout(new GridLayout(1,2));
+        midPanel.setBounds(300,170,compositePanelWidth,compositePanelHeight - 50);
+        midPanel.add(verificationButton);
+        midPanel.add(lastUpdateButton);
+        
         
         //set bottom right corner panel
         JPanel bottomRightPanel = new JPanel();
@@ -225,6 +259,7 @@ public class AdminPanel implements ActionListener, TreeModelListener, TreeSelect
         adminPanel.add(topLabel);
         adminPanel.add(topRightGroupPanel);
         adminPanel.add(oUserViewButton);
+        adminPanel.add(midPanel);
         adminPanel.add(bottomRightPanel);
     }
     
@@ -301,6 +336,7 @@ public class AdminPanel implements ActionListener, TreeModelListener, TreeSelect
                     JOptionPane.showMessageDialog(null, "No Group has been selected. " 
                             + newUser.getID() + " has been added to \"Root\".");
                 }
+                newUser.setCreationTime(System.currentTimeMillis());
             }
             this.userIdTextArea.setText("");
         }
@@ -339,7 +375,8 @@ public class AdminPanel implements ActionListener, TreeModelListener, TreeSelect
                     this.mapOfGroups.put(newGroup.getID(), newGroup);
                     visitor.visitGroups(newGroup);
                     JOptionPane.showMessageDialog(null, "No existing group has been selected. Your new group has been added to \"Root\"");
-                }                
+                }
+                newGroup.setCreationTime(System.currentTimeMillis());
             }
             this.groupIdTextArea.setText("");
         }
@@ -373,7 +410,45 @@ public class AdminPanel implements ActionListener, TreeModelListener, TreeSelect
         
         //show positive percentage button
         if(e.getSource() == sPositivePercentageButton){
-            JOptionPane.showMessageDialog(null, "Percentage of Positive Messages: " + this.posMessages() + "%");
+            JOptionPane.showMessageDialog(null, String.format("Percentage of Positive Messages: %.2f%%", this.posMessages()));
+        }
+        //ID verification button
+        if(e.getSource() == verificationButton){
+            if(!this.mapOfUsers.isEmpty() || !this.mapOfGroups.isEmpty()){
+                boolean isVerified = true;
+                for(Map.Entry<String,User> mapElement : mapOfUsers.entrySet()){
+                    if(mapElement.getKey().contains(" ")){
+                        isVerified = false;
+                    }
+                }
+                for(Map.Entry<String,Group> mapElement : mapOfGroups.entrySet()){
+                    if(mapElement.getKey().contains(" ")){
+                        isVerified = false;
+                    }
+                }
+                if(isVerified == false){
+                    JOptionPane.showMessageDialog(null, "Not Verified");
+                }
+                else{
+                    JOptionPane.showMessageDialog(null, "Verified");
+                }
+            }
+        }
+        
+        if(e.getSource() == lastUpdateButton){
+            long latestTime = 0;
+            String latestUser = "";
+            for(Map.Entry<String,User> mapElement : mapOfUsers.entrySet()){
+                if(mapElement.getValue().getUpdateTime() > latestTime){
+                    latestTime = mapElement.getValue().getUpdateTime();
+                    latestUser = mapElement.getValue().getID();
+                }
+            }
+            Date formattedDate = new Date(latestTime);
+            String newString = this.formattedTime.format(formattedDate);
+            
+            JOptionPane.showMessageDialog(null, 
+                    "Last Update: " + latestUser + ": " + newString);
         }
     }
     
@@ -387,7 +462,7 @@ public class AdminPanel implements ActionListener, TreeModelListener, TreeSelect
         
         Object nodeInfo = node.getUserObject();
         if (node.isRoot()) {
-            System.out.println("Hello");
+            System.out.println();
         } 
         else {
             System.out.println(nodeInfo.toString());
